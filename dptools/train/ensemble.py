@@ -8,6 +8,7 @@ import os
 
 from dptools.utils import graph2typemap, next_color
 
+
 class SampleConfigs:
     """
     Class for selecting new training configurations from snapshots of a molecular
@@ -36,6 +37,7 @@ class SampleConfigs:
         indices (str): Index slice to use for reading configs if str input supplied
             (used in command ase.io.read(config, index=indices)).
     """
+
     def __init__(self, configs, graphs, type_map=None, indices=":"):
         if isinstance(configs, str):
             self.configs = read(configs, index=indices)
@@ -49,21 +51,24 @@ class SampleConfigs:
     def get_dev(self):
         if "dev.npy" in os.listdir():
             old_dev = np.load("dev.npy")
-            if len(old_dev) == len(self.configs): # only read dev if configs haven't changed
+            if len(old_dev) == len(
+                self.configs
+            ):  # only read dev if configs haven't changed
                 print(f"Reading dev from {os.path.abspath('dev.npy')} ...")
                 return old_dev
 
         from deepmd.infer import calc_model_devi
         from deepmd.infer import DeepPot as DP
+
         pos = np.array([a.get_positions().flatten() for a in self.configs])
         cell = np.array([a.cell.array.flatten() for a in self.configs])
-        types = [self.type_map[a.symbol] for a in self.configs[0]]
+        types = np.array([self.type_map[a.symbol] for a in self.configs[0]])
 
         models = [DP(g) for g in self.graphs]
 
         try:
             dev = calc_model_devi(pos, cell, types, models, nopbc=False)[:, 4]
-        except TypeError: # nopbc removed in later deepmd-kit versions
+        except TypeError:  # nopbc removed in later deepmd-kit versions
             dev = calc_model_devi(pos, cell, types, models)[:, 4]
         np.save("dev.npy", dev)
         return dev
@@ -99,11 +104,11 @@ class SampleConfigs:
               | IF YOU USE THESE CONFIGS FOR TRAINING, MAKE SURE YOUR DFT CALCULATION CONVERGES! |
               | You will regret this if you do not heed this warning, trust me.                  |
               |__________________________________________________________________________________|
-               """ # large obnoxious warning box for emphasis
+               """  # large obnoxious warning box for emphasis
             print(warn)
 
         self.dev = self.get_dev()
-        i_configs = np.where(np.logical_and(self.dev>=lo, self.dev<=hi))[0]
+        i_configs = np.where(np.logical_and(self.dev >= lo, self.dev <= hi))[0]
         n_sample = n if n < len(i_configs) else len(i_configs)
         i_new_configs = random.sample(list(i_configs), n_sample)
         new_configs = [self.configs[i] for i in sorted(i_new_configs)]
@@ -127,6 +132,7 @@ class SampleConfigs:
         """
         import matplotlib.pyplot as plt
         import seaborn as sns
+
         if dev is None:
             if hasattr(self, "dev"):
                 dev = self.dev
@@ -138,12 +144,12 @@ class SampleConfigs:
         if steps:
             ax.set_xlabel("Steps / write_freq", fontsize=14)
             ax.set_ylabel("$\epsilon_t$ (eV/Å)", fontsize=14)
-            plt.plot(np.arange(len(dev)), dev, '-', color=color, label=label or "")
+            plt.plot(np.arange(len(dev)), dev, "-", color=color, label=label or "")
         else:
             sns.kdeplot(dev, fill=True, color=color, label=label or "")
             ax.set_ylabel("Density", fontsize=14)
             ax.set_xlabel("$\epsilon_t$ (eV/Å)", fontsize=14)
-        ax.locator_params('both', nbins=5)
+        ax.locator_params("both", nbins=5)
         ax.tick_params(labelsize=12)
         plt.tight_layout()
         return ax
