@@ -5,21 +5,29 @@ import os
 
 # defaults for Kulkarni group hpc systems
 hpc_defaults = {
-        "cori": {
-            "SBATCH_COMMENT": "#SBATCH -J job -q shared -N 1 -t 11:00:00 "\
-                "-C haswell --output=job.out --error=job.err --ntasks=1 -c 1",
-            "OMP_NUM_THREADS": "1",
-            "TF_INTRA_OP_PARALLELISM_THREADS": "1",
-            "TF_INTER_OP_PARALLELISM_THREADS": "1"
-            },
-        "hpc": {
-            "SBATCH_COMMENT": "#SBATCH --partition=med -N 1 --ntasks-per-node=8 "\
-                "--output=job.out --error=job.err -t 96:00:00",
-            "OMP_NUM_THREADS": "8",
-            "TF_INTRA_OP_PARALLELISM_THREADS": "6",
-            "TF_INTER_OP_PARALLELISM_THREADS": "2"
-            },
-        }
+    "bridges2": {
+        "SBATCH_COMMENT": "#SBATCH --partition=RM-shared -N 1 --ntasks-per-node=64 "
+        "--output=job.out --error=job.err -t 24:00:00",
+        "OMP_NUM_THREADS": "64",
+        "TF_INTRA_OP_PARALLELISM_THREADS": "24",
+        "TF_INTER_OP_PARALLELISM_THREADS": "24",
+    },
+    "cori": {
+        "SBATCH_COMMENT": "#SBATCH -J job -q shared -N 1 -t 11:00:00 "
+        "-C haswell --output=job.out --error=job.err --ntasks=1 -c 1",
+        "OMP_NUM_THREADS": "1",
+        "TF_INTRA_OP_PARALLELISM_THREADS": "1",
+        "TF_INTER_OP_PARALLELISM_THREADS": "1",
+    },
+    "hpc": {
+        "SBATCH_COMMENT": "#SBATCH --partition=med -N 1 --ntasks-per-node=8 "
+        "--output=job.out --error=job.err -t 96:00:00",
+        "OMP_NUM_THREADS": "8",
+        "TF_INTRA_OP_PARALLELISM_THREADS": "6",
+        "TF_INTER_OP_PARALLELISM_THREADS": "2",
+    },
+}
+
 
 # TODO: Split sbatch into n_nodes, n_tasks_per_node, etc.
 class SlurmJob:
@@ -59,15 +67,16 @@ class SlurmJob:
 
                 export TF_INTRA_OP_PARALLELISM_THREADS=1
     """
-    def __init__(self,
-                 sbatch_comment,
-                 commands="",
-                 directories=".",
-                 file_name="script.sh",
-                 zip_commands=False,
-                 **kwargs
-                 ):
 
+    def __init__(
+        self,
+        sbatch_comment,
+        commands="",
+        directories=".",
+        file_name="script.sh",
+        zip_commands=False,
+        **kwargs,
+    ):
         self.sbatch = sbatch_comment
         self._zip = zip_commands
         self.commands = commands
@@ -99,9 +108,9 @@ class SlurmJob:
         elif isinstance(self.commands, str):
             body += self.commands
 
-        else:    # do not write commands to body if self._zip
-            pass # in this case, self.commands contains
-                 # list of unique commands for each submission dir
+        else:  # do not write commands to body if self._zip
+            pass  # in this case, self.commands contains
+            # list of unique commands for each submission dir
 
         self.text = header + exports + body
 

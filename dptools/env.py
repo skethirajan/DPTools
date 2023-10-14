@@ -63,14 +63,16 @@ def get_dpfaults(key="model"):
                 n += 1
 
         defaults = tuple(
-                [default_vals.get(k) for k in sorted(keys) if default_vals.get(k)]
-                    )
+            [default_vals.get(k) for k in sorted(keys) if default_vals.get(k)]
+        )
 
     elif key == "sbatch":
-        keys = ["SBATCH_COMMENT",
-                "OMP_NUM_THREADS",
-                "TF_INTRA_OP_PARALLELISM_THREADS",
-                "TF_INTER_OP_PARALLELISM_THREADS"]
+        keys = [
+            "SBATCH_COMMENT",
+            "OMP_NUM_THREADS",
+            "TF_INTRA_OP_PARALLELISM_THREADS",
+            "TF_INTER_OP_PARALLELISM_THREADS",
+        ]
 
         if not default_vals.get(keys[0], None):
             set_default_sbatch()
@@ -85,6 +87,8 @@ def set_default_sbatch(warn=True):
     no Slurm info has been set to env.
     """
     host = re.sub("[^a-z]*", "", socket.gethostname())
+    if "bridges" in host:
+        host = "bridges2"
     try:
         for k, v in hpc_defaults[host].items():
             set_env(k, str(v))
@@ -96,8 +100,10 @@ def set_default_sbatch(warn=True):
                 print(k, "=", v)
             print("-" * 64)
     except KeyError as exc:
-        raise Exception("Host unrecognized and no default HPC parameters found."\
-            "\nUse 'dptools set script.sh' with desired #SBATCH comment in script.sh") from exc
+        raise Exception(
+            "Host unrecognized and no default HPC parameters found."
+            "\nUse 'dptools set script.sh' with desired #SBATCH comment in script.sh"
+        ) from exc
 
 
 def clear(keys):
@@ -118,12 +124,12 @@ def clear_model():
     Clear model related key-values from loaded global env file.
     """
     keys = [
-            "DPTOOLS_TYPE_MAP",
-            "DPTOOLS_MODEL",
-            "DPTOOLS_MODEL2",
-            "DPTOOLS_MODEL3",
-            "DPTOOLS_MODEL4",
-        ]
+        "DPTOOLS_TYPE_MAP",
+        "DPTOOLS_MODEL",
+        "DPTOOLS_MODEL2",
+        "DPTOOLS_MODEL3",
+        "DPTOOLS_MODEL4",
+    ]
     clear(keys)
 
 
@@ -136,7 +142,7 @@ def set_model(model, n_model=""):
         clear_model()
     graph = os.path.abspath(model)
     set_env(f"DPTOOLS_MODEL{n_model}", graph)
-    if not n_model: # only write type_map once if setting ensemble of models
+    if not n_model:  # only write type_map once if setting ensemble of models
         type_map = graph2typemap(graph)
         type_map_str = typemap2str(type_map)
         set_env("DPTOOLS_TYPE_MAP", type_map_str)
@@ -167,6 +173,7 @@ def set_params(params):
     Save set of simulation parameters to run with CLI :doc:`../commands/run` command.
     """
     from dptools.simulate.parameters import set_parameter_set
+
     set_parameter_set(params)
 
 
