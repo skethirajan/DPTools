@@ -65,7 +65,7 @@ class CLI(BaseCLI):
         if "out.json" not in os.listdir() and "in.json" not in os.listdir():
             raise FileNotFoundError("Systems not specified and no in.json in $PWD")
         in_file = "in.json" if "in.json" in os.listdir() else "out.json"
-        with open("in.json") as file:
+        with open(in_file) as file:
             params = json.loads(file.read())
         systems = params["training"]["training_data"]["systems"]
         test_sets = [os.path.join(s, "../test/set.000") for s in systems]
