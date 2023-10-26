@@ -27,6 +27,7 @@ descriptions = {
     "Pf": "Final pressure [bar] of simulation (ramped from Pi to Pf)",
     "pre_opt": "Optimize structure (and cell for npt-md) before starting MD run",
     "write_freq": "Write MD image every {write_freq} steps",
+    "use_plumed": "Plumed plugin for lammps (see https://www.plumed.org/doc-v2.8/user-doc/html/index.html)",
     "N": "Create N equally spaced structures with cell Volumes from V0*lo to V0*hi",
     "lo": "Lower bound for cell deformations (min volume = lo * V0)",
     "hi": "Upper bound for cell deformations (max volume = hi * V0)",

@@ -24,6 +24,7 @@ nvt-md:
   write_freq: 100
   disp_freq: 100
   pre_opt: false
+  use_plumed: false
 npt-md:
   type: npt-md
   steps: 10000
@@ -36,6 +37,7 @@ npt-md:
   write_freq: 100
   disp_freq: 100
   pre_opt: false
+  use_plumed: false
 eos:
   type: eos
   nsw: 500
